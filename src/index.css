@@ -1,0 +1,276 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: #f4f1e8;
+  --color-card: #fdfcf8;
+  --color-line: #e4decc;
+  --color-line-strong: #d4cdb4;
+
+  --color-ink-950: #0f2018;
+  --color-ink-900: #173025;
+  --color-ink-700: #33503f;
+  --color-ink-500: #5f7266;
+  --color-ink-400: #829286;
+  --color-ink-300: #a8b3a6;
+
+  --color-pine-950: #0d1f17;
+  --color-pine-900: #132a20;
+  --color-pine-800: #1c382c;
+  --color-pine-700: #28503e;
+
+  --color-marigold-600: #c4780c;
+  --color-marigold-500: #d98a12;
+  --color-marigold-100: #f9ead0;
+  --color-marigold-50: #fcf4e2;
+
+  --color-leaf-700: #22653f;
+  --color-leaf-600: #2c7a4b;
+  --color-leaf-100: #dcebe0;
+
+  --color-clay-600: #b3432b;
+  --color-clay-100: #f6dfd8;
+}
+
+:root {
+  --ease-out-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+body {
+  @apply bg-paper text-ink-950 font-sans antialiased;
+  font-feature-settings: "ss01", "cv11";
+  overflow-x: hidden;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+button:not(:disabled),
+a[href] {
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #d98a12;
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #d98a12;
+  color: #fff7e8;
+}
+
+/* thin elegant scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c9c2ac transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #c9c2ac;
+  border-radius: 8px;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Reliable wheel/touch scrolling inside portalled edit dialogs. */
+.modal-scroll {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-gutter: stable;
+}
+
+/* ---------- entrances ---------- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+.animate-shake {
+  animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+.animate-rise {
+  animation: rise 0.42s var(--ease-out-smooth) both;
+}
+.animate-pop {
+  animation: pop 0.32s var(--ease-out-smooth) both;
+}
+.animate-fade {
+  animation: fade 0.22s ease both;
+}
+.animate-toast {
+  animation: toast-in 0.32s var(--ease-out-smooth) both;
+}
+.animate-view {
+  animation: view-in 0.3s var(--ease-out-smooth) both;
+}
+
+/* stagger helper */
+.rise-1 { animation-delay: 0.035s; }
+.rise-2 { animation-delay: 0.075s; }
+.rise-3 { animation-delay: 0.115s; }
+.rise-4 { animation-delay: 0.155s; }
+
+/* inputs */
+.field {
+  @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink-950 outline-none transition
+    placeholder:text-ink-300 focus:border-marigold-500 focus:ring-4 focus:ring-marigold-500/15;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-ui);
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-marigold-500 px-4 py-2.5 text-sm font-semibold text-white
+    shadow-[0_2px_10px_rgba(217,138,18,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] transition
+    hover:-translate-y-0.5 hover:bg-marigold-600 hover:shadow-[0_4px_16px_rgba(217,138,18,0.4)]
+    active:translate-y-0 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-ui);
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink-700
+    transition hover:-translate-y-px hover:border-line-strong hover:bg-marigold-50 hover:text-ink-950
+    active:translate-y-0 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-ui);
+}
+
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-clay-100 bg-clay-100/60 px-4 py-2.5 text-sm font-semibold text-clay-600
+    transition hover:-translate-y-px hover:bg-clay-100 active:translate-y-0 active:scale-[0.98]
+    disabled:opacity-50 disabled:pointer-events-none;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-ui);
+}
+
+.card {
+  @apply rounded-2xl border border-line bg-card shadow-[0_1px_2px_rgba(23,48,37,0.05)];
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-12px_rgba(23,48,37,0.18)];
+  transition-timing-function: var(--ease-ui);
+}
+
+@media (hover: none) {
+  .btn-primary:hover,
+  .btn-ghost:hover,
+  .btn-danger:hover,
+  .card-hover:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* sidebar texture */
+.pine-texture {
+  background-color: #0d1f17;
+  background-image:
+    radial-gradient(ellipse 90% 55% at 75% -10%, rgba(44, 122, 75, 0.28), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 0% 105%, rgba(217, 138, 18, 0.14), transparent 60%);
+}
+
+/* code block */
+.codeblock {
+  @apply overflow-x-auto rounded-xl bg-pine-950 p-4 font-mono text-[12.5px] leading-relaxed text-[#cfe6d6];
+}
