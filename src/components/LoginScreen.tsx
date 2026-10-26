@@ -67,7 +67,7 @@ export default function LoginScreen({ onLogin }: Props) {
         units.length === 0
           ? sheetUrl
             ? "No flats are registered yet. Please ask your society admin to add your flat."
-            : "The Google Sheet backend isn't configured. Add its /exec URL to src/config.ts and redeploy the app."
+            : "The Google Sheet backend isn't configured. Add VITE_APPS_SCRIPT_URL in Vercel Production settings and redeploy."
           : "This owner mobile number isn't registered. Please contact your society admin."
       );
       return;
@@ -226,16 +226,15 @@ export default function LoginScreen({ onLogin }: Props) {
         </div>
 
         <div className="px-5 py-6 sm:px-7">
-          {/* The backend URL is compiled into src/config.ts for every device. */}
+          {/* The backend URL is compiled from Vercel's Production environment. */}
           {!connected && (
             <div className="animate-view mb-5 rounded-2xl border border-clay-600/25 bg-clay-100/45 p-4">
               <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-clay-600">
                 <TriangleAlert size={13} /> Backend not configured
               </p>
               <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-600">
-                Add your Apps Script <code className="font-mono text-ink-900">/exec</code> URL to{" "}
-                <code className="font-mono text-ink-900">src/config.ts</code>, then rebuild the app. It will work
-                automatically on every device.
+                Add <code className="font-mono text-ink-900">VITE_APPS_SCRIPT_URL</code> in Vercel{" "}
+                <strong>Settings / Environment Variables</strong>, select <strong>Production</strong>, then redeploy.
               </p>
             </div>
           )}
@@ -375,8 +374,8 @@ export default function LoginScreen({ onLogin }: Props) {
                   {!connected && (
                     <p className="mt-2 flex items-start gap-1.5 border-t border-marigold-500/20 pt-2 text-[11px] leading-relaxed text-clay-600">
                       <TriangleAlert size={12} className="mt-px shrink-0" />
-                      The URL in <code className="font-mono">src/config.ts</code> is empty — this password will stay on
-                      this device until the app is rebuilt with the shared backend URL.
+                      <code className="font-mono">VITE_APPS_SCRIPT_URL</code> is missing from the Production environment
+                      — this password will stay on this device until Vercel is configured and redeployed.
                     </p>
                   )}
                 </div>

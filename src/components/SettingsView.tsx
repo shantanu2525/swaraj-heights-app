@@ -252,8 +252,8 @@ export default function SettingsView({ onRelock }: { onRelock?: () => void }) {
                 </p>
               ) : (
                 <p className="mt-1 text-[11.5px] leading-relaxed text-ink-600">
-                  Set <code className="font-mono text-ink-900">APPS_SCRIPT_WEB_APP_URL</code> in{" "}
-                  <code className="font-mono text-ink-900">src/config.ts</code>, then rebuild and deploy once.
+                  Add <code className="font-mono text-ink-900">VITE_APPS_SCRIPT_URL</code> in Vercel{" "}
+                  <strong>Settings / Environment Variables</strong>, select Production, then redeploy.
                 </p>
               )}
             </div>
@@ -268,7 +268,9 @@ export default function SettingsView({ onRelock }: { onRelock?: () => void }) {
 
           <div className="flex flex-wrap items-center gap-2">
             {!sheetUrl ? (
-              <p className="text-[12px] font-semibold text-clay-600">Configure src/config.ts to enable syncing.</p>
+              <p className="text-[12px] font-semibold text-clay-600">
+                Configure VITE_APPS_SCRIPT_URL in Vercel Production settings to enable syncing.
+              </p>
             ) : (
               <>
               <button
@@ -441,12 +443,12 @@ export default function SettingsView({ onRelock }: { onRelock?: () => void }) {
 
           <Section
             step="4"
-            title="Set the global backend URL"
+            title="Set the Vercel Production variable"
             delay="rise-4"
-            desc="Open src/config.ts, paste the deployed /exec URL into APPS_SCRIPT_WEB_APP_URL, then rebuild and deploy the website. This is done once; every device will use it automatically."
+            desc="In Vercel: Project -> Settings -> Environment Variables. Add VITE_APPS_SCRIPT_URL, paste the deployed /exec URL, select Production, save, then redeploy. Every device will use it automatically."
           >
             <pre className="codeblock">
-              {`export const APPS_SCRIPT_WEB_APP_URL =\n  "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";`}
+              {`Name: VITE_APPS_SCRIPT_URL\nValue: https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec\nEnvironment: Production`}
             </pre>
           </Section>
         </>

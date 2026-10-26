@@ -45,7 +45,7 @@ export default function App() {
   // half-loaded screen (or a false "flat not found") while data is in flight
   const [bootSynced, setBootSynced] = useState(() => !getState().sheetUrl);
 
-  // The backend URL comes from src/config.ts. Every device pulls the same
+  // The backend URL comes from VITE_APPS_SCRIPT_URL. Every device pulls the same
   // sheet automatically; `bootSynced` flips only once data has settled.
   useEffect(() => {
     let alive = true;

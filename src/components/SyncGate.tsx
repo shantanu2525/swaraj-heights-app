@@ -150,8 +150,8 @@ export default function SyncGate({ syncing, connected, notFound, flatHint, onRet
                   </>
                 ) : (
                   <>
-                    The backend URL is missing from <strong className="font-mono text-ink-900">src/config.ts</strong>.
-                    Add the Apps Script <span className="font-mono">/exec</span> URL and redeploy the website once.
+                    Add <strong className="font-mono text-ink-900">VITE_APPS_SCRIPT_URL</strong> in Vercel's Production
+                    environment settings, then redeploy the website.
                   </>
                 )}
               </p>
