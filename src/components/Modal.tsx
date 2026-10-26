@@ -1,6 +1,41 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "../utils/cn";
+
+/**
+ * Tracks the *visible* viewport. On mobile the on-screen keyboard shrinks this
+ * but not `100dvh`, so a dialog sized to `dvh` would hide its footer behind the
+ * keyboard. Sizing to the visual viewport keeps the Save button reachable.
+ */
+function useVisualViewport() {
+  const read = () => {
+    const vv = typeof window !== "undefined" ? window.visualViewport : null;
+    return {
+      height: vv ? vv.height : typeof window !== "undefined" ? window.innerHeight : 800,
+      top: vv ? vv.offsetTop : 0,
+    };
+  };
+
+  const [box, setBox] = useState(read);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) {
+      const onResize = () => setBox(read());
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+    }
+    const onResize = () => setBox({ height: vv.height, top: vv.offsetTop });
+    vv.addEventListener("resize", onResize);
+    vv.addEventListener("scroll", onResize);
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      vv.removeEventListener("scroll", onResize);
+    };
+  }, []);
+
+  return box;
+}
 
 interface Props {
   onClose: () => void;
@@ -26,6 +61,8 @@ const SIZES = {
  * and action footer stay reachable on phones, tablets and desktop screens.
  */
 export default function Modal({ onClose, size = "md", layer = 70, children }: Props) {
+  const viewport = useVisualViewport();
+
   // close on Escape + lock background scroll while open
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -40,8 +77,8 @@ export default function Modal({ onClose, size = "md", layer = 70, children }: Pr
 
   return createPortal(
     <div
-      className="fixed inset-0 h-screen h-[100dvh] w-screen overflow-hidden"
-      style={{ zIndex: layer }}
+      className="fixed left-0 right-0 top-0 w-screen overflow-hidden"
+      style={{ zIndex: layer, height: viewport.height, transform: `translateY(${viewport.top}px)` }}
       role="dialog"
       aria-modal="true"
     >

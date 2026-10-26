@@ -18,10 +18,12 @@ export function toast(message: string, kind: Toast["kind"] = "success") {
   const t: Toast = { id: seq++, message, kind };
   toasts = [...toasts, t];
   emit();
+  // brief and non-blocking — errors linger a little longer to be readable
+  const ms = kind === "error" ? 3200 : 2200;
   setTimeout(() => {
     toasts = toasts.filter((x) => x.id !== t.id);
     emit();
-  }, 4200);
+  }, ms);
 }
 
 export function useToasts(): Toast[] {

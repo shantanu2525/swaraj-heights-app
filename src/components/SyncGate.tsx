@@ -45,8 +45,8 @@ export default function SyncGate({ syncing, connected, notFound, flatHint, onRet
   const slow = elapsed >= 8;
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-paper px-4 py-8 sm:py-10">
-      <div className="animate-pop card w-full max-w-sm overflow-hidden rounded-3xl!">
+    <div className="flex min-h-[100dvh] items-start justify-center bg-paper px-4 py-6 sm:py-10">
+      <div className="animate-pop card my-auto w-full max-w-sm overflow-hidden rounded-3xl!">
         <div className="pine-texture px-5 pb-7 pt-8 text-center sm:px-7">
           {/* progress ring */}
           <div className="relative mx-auto size-20">

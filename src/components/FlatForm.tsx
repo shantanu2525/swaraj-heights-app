@@ -238,7 +238,7 @@ export default function FlatForm({ initial, onClose }: Props) {
 
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-line bg-paper/60 px-4 py-3 sm:px-6 sm:py-4">
             <p className="text-[11.5px] text-ink-400">{valid ? "Only flat number is required" : "Enter a unique flat number"}</p>
-            <div className="flex gap-2">
+            <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
               <button onClick={onClose} className="btn-ghost">Cancel</button>
               <button onClick={save} disabled={!valid} className="btn-primary">
                 <Check size={16} strokeWidth={2.6} /> {editing ? "Save changes" : "Add flat"}

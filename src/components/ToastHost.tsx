@@ -23,7 +23,7 @@ const ICON_COLORS = {
 export default function ToastHost() {
   const toasts = useToasts();
   return (
-    <div className="pointer-events-none fixed bottom-5 right-5 z-[90] flex w-[calc(100vw-2.5rem)] max-w-sm flex-col gap-2">
+    <div className="pointer-events-none fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[90] flex w-[calc(100vw-2rem)] max-w-sm flex-col gap-2 sm:right-5 lg:bottom-5">
       {toasts.map((t) => {
         const Icon = ICONS[t.kind];
         return (

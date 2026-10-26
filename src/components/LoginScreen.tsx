@@ -176,8 +176,8 @@ export default function LoginScreen({ onLogin }: Props) {
   );
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-paper px-4 py-8 sm:py-10">
-      <div className={cn("animate-pop card w-full max-w-md overflow-hidden rounded-3xl!", shake && "animate-shake")}>
+    <div className="flex min-h-[100dvh] items-start justify-center bg-paper px-4 py-6 sm:py-10">
+      <div className={cn("animate-pop card my-auto w-full max-w-md overflow-hidden rounded-3xl!", shake && "animate-shake")}>
         {/* brand header */}
         <div className="pine-texture px-5 pb-6 pt-8 text-center sm:px-7">
           <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-marigold-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
