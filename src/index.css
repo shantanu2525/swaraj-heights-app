@@ -41,11 +41,15 @@
 
 html {
   scroll-behavior: smooth;
+  /* stop mobile browsers inflating text on rotation/zoom */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html,
 body,
 #root {
+  height: 100%;
   min-height: 100%;
 }
 
@@ -57,6 +61,33 @@ body {
   @apply bg-paper text-ink-950 font-sans antialiased;
   font-feature-settings: "ss01", "cv11";
   overflow-x: hidden;
+  /* kills pull-to-refresh and rubber-band bounce for an app-like feel */
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+  text-rendering: optimizeLegibility;
+  /* app chrome shouldn't be selectable; fields opt back in below */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/*
+ * THE fix for "zooms in while typing": iOS Safari zooms any focused input
+ * whose font-size is below 16px. Every field is therefore at least 16px.
+ * Explicit utility sizes (e.g. text-[24px]) still win by specificity.
+ */
+input,
+select,
+textarea {
+  font-size: 16px;
 }
 
 button,
@@ -195,12 +226,25 @@ a:focus-visible {
 .rise-3 { animation-delay: 0.115s; }
 .rise-4 { animation-delay: 0.155s; }
 
-/* inputs */
+/* inputs — 16px so iOS never auto-zooms on focus */
 .field {
-  @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink-950 outline-none transition
+  @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-[16px] text-ink-950 outline-none transition
     placeholder:text-ink-300 focus:border-marigold-500 focus:ring-4 focus:ring-marigold-500/15;
   transition-duration: 180ms;
   transition-timing-function: var(--ease-ui);
+}
+
+/* the big ₹ amount inputs stay large on purpose */
+.field-lg {
+  font-size: 24px;
+}
+
+/* notch / home-bar safe areas */
+.safe-top {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
 }
 
 .btn-primary {

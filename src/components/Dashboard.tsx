@@ -35,16 +35,20 @@ interface Props {
 
 /* ------------------------------ period filter ------------------------------ */
 
-export type PeriodId = "this" | "prev" | "3m" | "6m" | "year" | "all";
+export type PeriodId = "this" | "prev" | "prev2" | "3m" | "6m" | "year" | "all";
 
 const PERIODS: { id: PeriodId; label: string; short: string }[] = [
   { id: "this", label: "This month", short: "This month" },
   { id: "prev", label: "Previous month", short: "Last month" },
+  { id: "prev2", label: "2 months ago", short: "2 months ago" },
   { id: "3m", label: "Last 3 months", short: "3 months" },
   { id: "6m", label: "Last 6 months", short: "6 months" },
   { id: "year", label: "This year", short: "This year" },
   { id: "all", label: "Till date", short: "All time" },
 ];
+
+/** Residents may only look back two months. */
+const OWNER_PERIODS: PeriodId[] = ["this", "prev", "prev2"];
 
 /** inclusive month-key range for a period; null start = unbounded */
 function periodRange(id: PeriodId): { from: string | null; to: string | null; label: string } {
@@ -55,6 +59,10 @@ function periodRange(id: PeriodId): { from: string | null; to: string | null; la
     case "prev": {
       const p = shiftMonth(now, -1);
       return { from: p, to: p, label: monthLongLabel(p) };
+    }
+    case "prev2": {
+      const p2 = shiftMonth(now, -2);
+      return { from: p2, to: p2, label: monthLongLabel(p2) };
     }
     case "3m":
       return { from: shiftMonth(now, -2), to: now, label: "Last 3 months" };
@@ -185,10 +193,19 @@ function useAnalytics(period: PeriodId) {
 
 /* ------------------------------ components ------------------------------ */
 
-function PeriodFilter({ value, onChange }: { value: PeriodId; onChange: (p: PeriodId) => void }) {
+function PeriodFilter({
+  value,
+  onChange,
+  options,
+}: {
+  value: PeriodId;
+  onChange: (p: PeriodId) => void;
+  options?: PeriodId[];
+}) {
+  const list = options ? PERIODS.filter((p) => options.includes(p.id)) : PERIODS;
   return (
     <div className="animate-rise -mx-1 flex snap-x items-center gap-1.5 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible">
-      {PERIODS.map((p) => (
+      {list.map((p) => (
         <button
           key={p.id}
           onClick={() => onChange(p.id)}
@@ -241,13 +258,23 @@ function StatCard({
   );
 }
 
-function MonthlyChart({ months, maxMonth }: { months: ReturnType<typeof useAnalytics>["months"]; maxMonth: number }) {
+function MonthlyChart({
+  months,
+  maxMonth,
+  compact,
+}: {
+  months: ReturnType<typeof useAnalytics>["months"];
+  maxMonth: number;
+  compact?: boolean;
+}) {
   return (
     <div className="card animate-rise rise-2 p-6">
       <div className="flex items-baseline justify-between">
         <div>
           <h3 className="font-display text-[17px] font-semibold tracking-tight text-ink-950">Monthly spend</h3>
-          <p className="mt-0.5 text-[12px] text-ink-500">Last six months · all entries</p>
+          <p className="mt-0.5 text-[12px] text-ink-500">
+            {compact ? "Last three months · all entries" : "Last six months · all entries"}
+          </p>
         </div>
       </div>
       <div className="mt-6 flex h-[168px] items-end gap-3 sm:gap-5">
@@ -483,8 +510,14 @@ function CollectionsStrip({ onOpen, readOnly }: { onOpen: () => void; readOnly?:
 /* ------------------------------ main view ------------------------------ */
 
 export default function Dashboard({ onNew, onSeeAll, onCollections, readOnly }: Props) {
-  const [period, setPeriod] = useState<PeriodId>("all");
-  const a = useAnalytics(period);
+  const [period, setPeriod] = useState<PeriodId>("this");
+  // Residents may look back at most two months; anything else is admin-only.
+  const effectivePeriod: PeriodId = readOnly
+    ? OWNER_PERIODS.includes(period)
+      ? period
+      : "this"
+    : period;
+  const a = useAnalytics(effectivePeriod);
 
   const delta = a.prevMonth > 0 ? ((a.thisMonth - a.prevMonth) / a.prevMonth) * 100 : null;
 
@@ -518,9 +551,13 @@ export default function Dashboard({ onNew, onSeeAll, onCollections, readOnly }: 
 
   return (
     <div className="space-y-5">
-      <PeriodFilter value={period} onChange={setPeriod} />
+      <PeriodFilter
+        value={effectivePeriod}
+        onChange={setPeriod}
+        options={readOnly ? OWNER_PERIODS : undefined}
+      />
 
-      <div key={period} className="animate-view space-y-5">
+      <div key={effectivePeriod} className="animate-view space-y-5">
         {/* money in / out */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
         <StatCard
@@ -554,7 +591,7 @@ export default function Dashboard({ onNew, onSeeAll, onCollections, readOnly }: 
           tone="marigold"
           delay="rise-3"
           sub={
-            delta === null ? (
+            readOnly || delta === null ? (
               <span className="tnum">{a.scoped.length} entries · {a.label}</span>
             ) : (
               <span className={cn("inline-flex items-center gap-1", delta >= 0 ? "text-clay-600" : "text-leaf-700")}>
@@ -605,10 +642,15 @@ export default function Dashboard({ onNew, onSeeAll, onCollections, readOnly }: 
         <CollectionsStrip onOpen={onCollections} readOnly={readOnly} />
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2">
-          <MonthlyChart months={a.months} maxMonth={a.maxMonth} />
-        </div>
-        <CategoryDonut breakdown={a.catBreakdown} grand={a.grand} periodLabel={a.label} />
+          <div className="xl:col-span-2">
+            {/* residents see only the 3 months they're allowed to view */}
+            <MonthlyChart
+              months={readOnly ? a.months.slice(-3) : a.months}
+              maxMonth={a.maxMonth}
+              compact={readOnly}
+            />
+          </div>
+          <CategoryDonut breakdown={a.catBreakdown} grand={a.grand} periodLabel={a.label} />
         </div>
 
         <div className="card animate-rise rise-4 overflow-hidden">

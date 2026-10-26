@@ -1,8 +1,6 @@
 import { useState } from "react";
 import {
   Sheet,
-  Link2,
-  Unlink,
   RefreshCw,
   UploadCloud,
   DownloadCloud,
@@ -22,9 +20,9 @@ import {
   CloudCheck,
   HardDrive,
 } from "lucide-react";
-import { useAppState, connectSheet, disconnectSheet, pushNow, pullNow, loadSample, clearAll, setMeta } from "../lib/store";
+import { useAppState, pushNow, pullNow, loadSample, clearAll, setMeta } from "../lib/store";
 import { APPS_SCRIPT_CODE, SCRIPT_VERSION } from "../lib/appsScriptCode";
-import { validateSheetUrl } from "../lib/sheets";
+import { APPS_SCRIPT_WEB_APP_URL, HAS_CONFIGURED_BACKEND } from "../config";
 import { passwordRecord, verifyPassword } from "../lib/auth";
 import { toast } from "../lib/toaster";
 import { cn } from "../utils/cn";
@@ -191,17 +189,14 @@ function AppLockSection({ onRelock }: { onRelock?: () => void }) {
 
 export default function SettingsView({ onRelock }: { onRelock?: () => void }) {
   const { sheetUrl, sync, lastError, records, units, payments, scriptVersion, meta } = useAppState();
-  const [url, setUrl] = useState(sheetUrl ?? "");
-  const [busy, setBusy] = useState<"connect" | "push" | "pull" | null>(null);
+  const [busy, setBusy] = useState<"push" | "pull" | null>(null);
   const [copied, setCopied] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [showGuide, setShowGuide] = useState(!sheetUrl);
 
   const scriptOutdated = Boolean(sheetUrl) && scriptVersion !== null && scriptVersion < SCRIPT_VERSION;
 
-  const urlErr = url.trim() && url.trim() !== (sheetUrl ?? "") ? validateSheetUrl(url) : null;
-
-  async function run(kind: "connect" | "push" | "pull", fn: () => Promise<boolean>) {
+  async function run(kind: "push" | "pull", fn: () => Promise<boolean>) {
     setBusy(kind);
     await fn();
     setBusy(null);
@@ -234,19 +229,35 @@ export default function SettingsView({ onRelock }: { onRelock?: () => void }) {
           </div>
         </div>
         <div className="space-y-4 px-6 py-5">
-          <label className="block">
-            <span className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-[0.08em] text-ink-500">
-              Apps Script Web App URL
-            </span>
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://script.google.com/macros/s/AKfy…/exec"
-              spellCheck={false}
-              className={cn("field font-mono text-[12.5px]!", urlErr && "border-clay-600! ring-4! ring-clay-600/10!")}
-            />
-            {urlErr && <p className="mt-1.5 text-[12px] font-medium text-clay-600">{urlErr}</p>}
-          </label>
+          <div
+            className={cn(
+              "flex items-start gap-3 rounded-xl border px-4 py-3",
+              HAS_CONFIGURED_BACKEND
+                ? "border-leaf-600/25 bg-leaf-100/45"
+                : "border-clay-600/25 bg-clay-100/45"
+            )}
+          >
+            {HAS_CONFIGURED_BACKEND ? (
+              <CloudCheck size={17} className="mt-0.5 shrink-0 text-leaf-700" />
+            ) : (
+              <AlertTriangle size={17} className="mt-0.5 shrink-0 text-clay-600" />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="text-[12.5px] font-bold text-ink-950">
+                {HAS_CONFIGURED_BACKEND ? "Configured globally" : "Backend URL missing"}
+              </p>
+              {HAS_CONFIGURED_BACKEND ? (
+                <p className="mt-1 truncate font-mono text-[11px] text-ink-500" title={APPS_SCRIPT_WEB_APP_URL}>
+                  {APPS_SCRIPT_WEB_APP_URL}
+                </p>
+              ) : (
+                <p className="mt-1 text-[11.5px] leading-relaxed text-ink-600">
+                  Set <code className="font-mono text-ink-900">APPS_SCRIPT_WEB_APP_URL</code> in{" "}
+                  <code className="font-mono text-ink-900">src/config.ts</code>, then rebuild and deploy once.
+                </p>
+              )}
+            </div>
+          </div>
 
           {sync === "error" && lastError && (
             <div className="flex items-start gap-2.5 rounded-xl border border-clay-600/20 bg-clay-100/50 px-4 py-3">
@@ -257,16 +268,10 @@ export default function SettingsView({ onRelock }: { onRelock?: () => void }) {
 
           <div className="flex flex-wrap items-center gap-2">
             {!sheetUrl ? (
-              <button
-                onClick={() => run("connect", () => connectSheet(url))}
-                disabled={Boolean(busy) || Boolean(urlErr) || !url.trim()}
-                className="btn-primary"
-              >
-                <Link2 size={15} /> {busy === "connect" ? "Connecting…" : "Save & connect"}
-              </button>
+              <p className="text-[12px] font-semibold text-clay-600">Configure src/config.ts to enable syncing.</p>
             ) : (
               <>
-                <button
+              <button
                   onClick={() => run("pull", () => pullNow())}
                   disabled={Boolean(busy)}
                   className="btn-ghost"
@@ -289,9 +294,6 @@ export default function SettingsView({ onRelock }: { onRelock?: () => void }) {
                 >
                   <UploadCloud size={15} className={cn(busy === "push" && "animate-bounce")} />
                   {busy === "push" ? "Pushing…" : "Push to sheet"}
-                </button>
-                <button onClick={disconnectSheet} className="btn-ghost text-clay-600! hover:bg-clay-100/60!">
-                  <Unlink size={14} /> Disconnect
                 </button>
               </>
             )}
@@ -435,6 +437,17 @@ export default function SettingsView({ onRelock }: { onRelock?: () => void }) {
                 </li>
               ))}
             </ol>
+          </Section>
+
+          <Section
+            step="4"
+            title="Set the global backend URL"
+            delay="rise-4"
+            desc="Open src/config.ts, paste the deployed /exec URL into APPS_SCRIPT_WEB_APP_URL, then rebuild and deploy the website. This is done once; every device will use it automatically."
+          >
+            <pre className="codeblock">
+              {`export const APPS_SCRIPT_WEB_APP_URL =\n  "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";`}
+            </pre>
           </Section>
         </>
       )}

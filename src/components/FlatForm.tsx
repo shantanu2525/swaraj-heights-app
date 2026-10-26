@@ -57,8 +57,8 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
 const digits = (v: string) => v.replace(/[^\d+\-\s]/g, "").slice(0, 18);
 
 export default function FlatForm({ initial, onClose }: Props) {
-  const { defaultAmount } = useAppState();
   const editing = Boolean(initial);
+  const { defaultAmount } = useAppState();
   const [u, setU] = useState<Unit>(() => initial ?? blankUnit());
 
   const set = <K extends keyof Unit>(key: K, value: Unit[K]) => setU((prev) => ({ ...prev, [key]: value }));

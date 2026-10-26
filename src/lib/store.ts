@@ -5,6 +5,7 @@ import { buildSamplePayments, buildSampleRecords, buildSampleUnits } from "./sam
 import { compareFlatLabels, currentMonthKey, uid } from "./format";
 import { normalizeMobile } from "./auth";
 import { toast } from "./toaster";
+import { APPS_SCRIPT_WEB_APP_URL, HAS_CONFIGURED_BACKEND } from "../config";
 
 const LS_RECORDS = "khata.records.v1";
 const LS_UNITS = "khata.units.v1";
@@ -42,7 +43,11 @@ function loadUnits(): Unit[] {
   });
 }
 
-const storedUrl = localStorage.getItem(LS_URL);
+// Code-level configuration wins on every device. The local value remains as
+// a backwards-compatible fallback for existing installations.
+const storedUrl = HAS_CONFIGURED_BACKEND
+  ? APPS_SCRIPT_WEB_APP_URL.trim()
+  : localStorage.getItem(LS_URL);
 
 let state: AppState = {
   records: readJSON<MaintenanceRecord[]>(LS_RECORDS, []),

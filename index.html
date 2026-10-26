@@ -2,8 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Locks the layout to the device viewport: no pinch/auto zoom, and
+         viewport-fit=cover extends the app behind notches and home bars. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta name="description" content="Maintenance Khata — building maintenance record keeping in ₹, synced to Google Sheets." />
+
+    <!-- Install as a standalone app (no browser chrome) -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Maintenance Khata" />
+
+    <!-- Browser chrome matches the pine header -->
+    <meta name="theme-color" content="#0d1f17" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Stop iOS from auto-linking phone numbers in the flat register -->
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

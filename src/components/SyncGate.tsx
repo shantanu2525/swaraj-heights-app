@@ -150,8 +150,8 @@ export default function SyncGate({ syncing, connected, notFound, flatHint, onRet
                   </>
                 ) : (
                   <>
-                    Ask your society admin to sign in on this device once and connect the Google Sheet in{" "}
-                    <strong className="text-ink-900">Settings</strong>.
+                    The backend URL is missing from <strong className="font-mono text-ink-900">src/config.ts</strong>.
+                    Add the Apps Script <span className="font-mono">/exec</span> URL and redeploy the website once.
                   </>
                 )}
               </p>

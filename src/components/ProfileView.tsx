@@ -6,6 +6,7 @@ import {
   Mail,
   Siren,
   Car,
+  SquareParking,
   IndianRupee,
   KeyRound,
   Check,
@@ -22,13 +23,23 @@ import { cn } from "../utils/cn";
 import type { Occupancy, Unit } from "../types";
 import TenantFields from "./TenantFields";
 
-function ReadOnly({ label, value, icon: Icon }: { label: string; value: string; icon?: typeof Home }) {
+function ReadOnly({
+  label,
+  value,
+  icon: Icon,
+  className,
+}: {
+  label: string;
+  value: string;
+  icon?: typeof Home;
+  className?: string;
+}) {
   return (
-    <div>
+    <div className={className}>
       <p className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.07em] text-ink-400">
         {Icon && <Icon size={11.5} />} {label}
       </p>
-      <p className="rounded-xl border border-line bg-paper/70 px-3.5 py-2.5 text-[13px] font-semibold text-ink-700">
+      <p className="truncate rounded-xl border border-line bg-paper/70 px-3.5 py-2.5 text-[13px] font-semibold text-ink-700">
         {value || "—"}
       </p>
     </div>
@@ -185,12 +196,46 @@ export default function ProfileView({ unitId }: { unitId: string }) {
             <ReadOnly label="Owner name" value={unit.ownerName} icon={User} />
             <ReadOnly label="Owner mobile" value={unit.ownerMobile} icon={Phone} />
             <ReadOnly label="Monthly maintenance" value={fmtINR(unitAmount(unit, defaultAmount))} icon={IndianRupee} />
+            <ReadOnly label="Parking slot" value={unit.parkingSlot} icon={SquareParking} className="sm:col-span-3" />
             {unit.occupancy === "tenant" && (
               <>
                 <ReadOnly label="Tenant name" value={unit.tenantName} icon={UserCheck} />
                 <ReadOnly label="Tenant mobile" value={unit.tenantMobile} icon={Phone} />
               </>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* parking */}
+      <section className="card animate-rise rise-1 p-5 sm:p-6">
+        <h3 className="font-display flex items-center gap-2 text-[17px] font-semibold tracking-tight text-ink-950">
+          <SquareParking size={16} className="text-marigold-600" /> Parking
+        </h3>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-marigold-500/25 bg-marigold-50/60 px-4 py-3.5">
+            <p className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.12em] text-marigold-600">
+              <SquareParking size={11.5} /> Allotted slot
+            </p>
+            <p className="tnum mt-1.5 text-[18px] font-bold tracking-tight text-ink-950">
+              {unit.parkingSlot || "Not allotted"}
+            </p>
+            {unit.parkingSlot && (
+              <p className="mt-1 text-[11px] text-ink-500">Managed by the society admin</p>
+            )}
+          </div>
+
+          <div>
+            <p className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.07em] text-ink-400">
+              <Car size={11.5} /> Registered vehicles
+            </p>
+            <p className="min-h-[46px] rounded-xl border border-line bg-paper/70 px-3.5 py-2.5 text-[13px] font-semibold text-ink-700">
+              {unit.vehicles || "—"}
+            </p>
+            <p className="mt-1.5 text-[11px] text-ink-400">
+              You can update your vehicles in the section below.
+            </p>
           </div>
         </div>
       </section>

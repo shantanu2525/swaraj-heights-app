@@ -185,7 +185,9 @@ export default function Sidebar({ view, onNavigate, onNew, role, flatLabel, onLo
           <LogOut size={15} className="text-white/40" />
           <span className="text-[12.5px] font-semibold text-white/80">Sign out</span>
         </button>
-        <SyncBadge onClick={() => onNavigate("settings")} />
+        {/* Residents have no Settings view — send them to their profile instead
+            of a blank screen. */}
+        <SyncBadge onClick={() => onNavigate(isAdmin ? "settings" : "profile")} />
       </div>
     </aside>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LayoutDashboard, ClipboardList, HandCoins, Settings, Plus, CircleUser } from "lucide-react";
 import Sidebar, { Logo } from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
@@ -39,20 +39,27 @@ export default function App() {
   const [view, setView] = useState<View>("dashboard");
   const [modal, setModal] = useState<Modal>(null);
   const state = useAppState();
+  // <main> is the scroll container on mobile (app shell), the window on desktop
+  const scrollRef = useRef<HTMLElement | null>(null);
   // false until the first sheet pull settles, so residents aren't shown a
   // half-loaded screen (or a false "flat not found") while data is in flight
   const [bootSynced, setBootSynced] = useState(() => !getState().sheetUrl);
 
-  // On startup: silently refresh from the sheet if one is connected
+  // The backend URL comes from src/config.ts. Every device pulls the same
+  // sheet automatically; `bootSynced` flips only once data has settled.
   useEffect(() => {
+    let alive = true;
+    const finish = () => {
+      if (alive) setBootSynced(true);
+    };
+
     if (!getState().sheetUrl) {
       setBootSynced(true);
-      return;
+      return () => {
+        alive = false;
+      };
     }
-    let alive = true;
-    void pullNow({ quiet: true }).finally(() => {
-      if (alive) setBootSynced(true);
-    });
+    void pullNow({ quiet: true }).finally(finish);
     return () => {
       alive = false;
     };
@@ -76,15 +83,21 @@ export default function App() {
     setView("dashboard");
   }
 
-  function navigate(next: View) {
+  function scrollTop() {
     const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    const el = scrollRef.current;
+    if (el && el.scrollHeight > el.clientHeight) el.scrollTo({ top: 0, behavior });
+    else window.scrollTo({ top: 0, behavior });
+  }
+
+  function navigate(next: View) {
     if (next === view) {
-      window.scrollTo({ top: 0, behavior });
+      scrollTop();
       return;
     }
     setView(next);
     // Let React paint the incoming view before moving the viewport.
-    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior }));
+    window.requestAnimationFrame(scrollTop);
   }
 
   // Resident whose flat isn't loaded yet. While the first sheet pull is still
@@ -123,7 +136,7 @@ export default function App() {
       ] as const);
 
   return (
-    <div className="flex min-h-[100dvh] bg-paper">
+    <div className="flex h-[100dvh] w-full overflow-hidden bg-paper lg:h-auto lg:min-h-[100dvh] lg:overflow-visible">
       <Sidebar
         view={view}
         onNavigate={navigate}
@@ -133,9 +146,9 @@ export default function App() {
         onLogout={logout}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* mobile top bar */}
-        <div className="pine-texture sticky top-0 z-50 flex items-center justify-between gap-2 px-4 py-3 lg:hidden">
+      <div className="flex h-full min-w-0 flex-1 flex-col lg:h-auto">
+        {/* app bar — fixed, content scrolls beneath it */}
+        <div className="pine-texture safe-top relative z-50 flex shrink-0 items-center justify-between gap-2 px-4 py-3 lg:hidden">
           <Logo />
           <div className="flex shrink-0 items-center gap-2">
             {isAdmin && (
@@ -147,7 +160,10 @@ export default function App() {
           </div>
         </div>
 
-        <main className="w-full flex-1 px-4 pb-28 pt-5 sm:px-6 md:pt-8 lg:px-8 lg:pb-12 2xl:px-12">
+        <main
+          ref={scrollRef}
+          className="h-full w-full flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-5 sm:px-6 md:pt-8 lg:h-auto lg:overflow-visible lg:px-8 lg:pb-12 2xl:px-12"
+        >
           <header
             key={`header-${view}`}
             className="animate-view mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 md:mb-8"
@@ -189,11 +205,18 @@ export default function App() {
             )}
             {view === "settings" && isAdmin && <SettingsView onRelock={logout} />}
             {view === "profile" && !isAdmin && session.unitId && <ProfileView unitId={session.unitId} />}
+            {/* Safety net: a role-restricted view must never render a blank screen */}
+            {((view === "settings" && !isAdmin) || (view === "profile" && isAdmin)) && (
+              <div className="card p-10 text-center">
+                <p className="text-[14px] font-semibold text-ink-900">This page isn't available</p>
+                <p className="mt-1 text-[12.5px] text-ink-500">Choose another section from the menu.</p>
+              </div>
+            )}
           </div>
         </main>
 
-        {/* mobile bottom nav */}
-        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 px-2 pb-[max(env(safe-area-inset-bottom),0.25rem)] backdrop-blur lg:hidden">
+        {/* tab bar — sits in the layout like a native app, not an overlay */}
+        <nav className="safe-bottom z-40 shrink-0 border-t border-line bg-card/95 px-2 backdrop-blur lg:hidden">
           <div className="mx-auto grid max-w-md grid-cols-4 gap-1 py-2">
             {mobileNav.map((item) => (
               <button
